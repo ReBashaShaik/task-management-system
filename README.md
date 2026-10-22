@@ -89,11 +89,17 @@ Then start Docker Compose:
 docker compose up --build
 ```
 
-The API is at <http://localhost:8000>; interactive docs are at <http://localhost:8000/docs>. The container runs database migrations before starting the API.
+The API is at <http://localhost:8000>; interactive docs are at <http://localhost:8000/docs>. The container runs database migrations before starting the API. Docker's MySQL is available on host port `3307`, which avoids clashing with a MySQL server already using `3306`.
 
-### Run directly on Windows with SQLite
+### Run directly on Windows with your local MySQL
 
-This option is useful for learning and trying Swagger without starting Docker or MySQL. When no `.env` file is present, the app uses a local SQLite database named `task_management.db`.
+Make sure MySQL is running and the `.env` file points to your local database. The database URL format is:
+
+```text
+mysql+pymysql://root:<URL-encoded-password>@127.0.0.1:3306/task_management
+```
+
+Encode special characters in the password for the URL. For example, `@` becomes `%40`. Keep `.env` private; it is ignored by Git and excluded from the project ZIP.
 
 Open PowerShell in the project folder and run:
 
@@ -113,7 +119,7 @@ python -m bootstrap
 python -m uvicorn main:app --reload --port 8001
 ```
 
-Open <http://127.0.0.1:8001/docs> and start with `GET /health`. Keep the terminal open while testing. The local SQLite mode is for development; Docker Compose starts the project's MySQL database.
+Open <http://127.0.0.1:8001/docs> and start with `GET /health`. Keep the terminal open while testing. If `.env` is removed, the app falls back to the local SQLite file `task_management.db`.
 
 ### Run tests
 

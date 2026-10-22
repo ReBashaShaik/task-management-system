@@ -7,7 +7,8 @@ services:
       MYSQL_PASSWORD: task_password
       MYSQL_ROOT_PASSWORD: local_root_password
     ports:
-      - "3306:3306"
+      # Use host port 3307 so a local MySQL server can keep port 3306.
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
@@ -18,6 +19,9 @@ services:
   api:
     build: .
     env_file: .env
+    environment:
+      # Inside Docker, the API reaches MySQL by the Compose service name.
+      DATABASE_URL: mysql+pymysql://task_user:task_password@db:3306/task_management
     ports:
       - "8000:8000"
     depends_on:
