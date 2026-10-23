@@ -1,25 +1,25 @@
 {
   "info": {
-    "name": "Task Management API — all endpoints",
-    "description": "Follow API_TEST_CASES.md in order. Register a manager and member first, save the returned IDs, then test project, task, comment, and admin actions. Admin login requires bootstrap admin credentials.",
+    "name": "Task Management API \u2014 all endpoints",
+    "description": "Postman collection for testing the Task Management System API. Import this file into Postman and send requests in folder order. The manager and member registration requests generate fresh Gmail addresses; login requests save JWT tokens and create requests save returned IDs for later steps. The collection checks the expected HTTP status for every request. Before using Admin requests, replace adminEmail and adminPassword with BOOTSTRAP_ADMIN_EMAIL and BOOTSTRAP_ADMIN_PASSWORD from your private .env file. An admin cannot be created through public registration. The Docker default is http://localhost:8000; edit baseUrl if your server uses another port. Run the destructive Admin folder last.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://127.0.0.1:8001"
+      "value": "http://localhost:8000"
     },
     {
       "key": "managerEmail",
-      "value": "sam.manager@gmail.com"
+      "value": ""
     },
     {
       "key": "memberEmail",
-      "value": "lee.member@gmail.com"
+      "value": ""
     },
     {
       "key": "adminEmail",
-      "value": "admin.local@gmail.com"
+      "value": "SET_FROM_BOOTSTRAP_ADMIN_EMAIL"
     },
     {
       "key": "password",
@@ -27,7 +27,7 @@
     },
     {
       "key": "adminPassword",
-      "value": "LocalAdminPass123!"
+      "value": "SET_FROM_BOOTSTRAP_ADMIN_PASSWORD"
     },
     {
       "key": "managerToken",
@@ -43,19 +43,19 @@
     },
     {
       "key": "memberId",
-      "value": "2"
+      "value": ""
     },
     {
       "key": "projectId",
-      "value": "1"
+      "value": ""
     },
     {
       "key": "taskId",
-      "value": "1"
+      "value": ""
     },
     {
       "key": "commentId",
-      "value": "1"
+      "value": ""
     },
     {
       "key": "cleanupTaskId",
@@ -73,7 +73,18 @@
             "header": [],
             "url": "{{baseUrl}}/health",
             "description": "No login required. Expect 200 and status=ok."
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Register manager",
@@ -96,7 +107,27 @@
               }
             },
             "description": "Use an email that has not registered before. Expect 201."
-          }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"managerEmail\", \"manager.\" + Date.now() + \".\" + Math.floor(Math.random()*100000) + \"@gmail.com\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Register member",
@@ -122,13 +153,23 @@
           },
           "event": [
             {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"memberEmail\", \"member.\" + Date.now() + \".\" + Math.floor(Math.random()*100000) + \"@gmail.com\");"
+                ]
+              }
+            },
+            {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
                   "const data = pm.response.json();",
                   "pm.collectionVariables.set('memberId', data.id);",
-                  "pm.test('Saved memberId', function () { pm.expect(data.id).to.exist; });"
+                  "pm.test('Saved memberId', function () { pm.expect(data.id).to.exist; });",
+                  "pm.test(\"Expected HTTP 201\", function () { pm.response.to.have.status(201); });"
                 ]
               }
             }
@@ -165,7 +206,8 @@
                 "exec": [
                   "const data = pm.response.json();",
                   "pm.collectionVariables.set('managerToken', data.access_token);",
-                  "pm.test('Login returned a token', function () { pm.expect(data.token_type).to.eql('bearer'); });"
+                  "pm.test('Login returned a token', function () { pm.expect(data.token_type).to.eql('bearer'); });",
+                  "pm.test(\"Expected HTTP 200\", function () { pm.response.to.have.status(200); });"
                 ]
               }
             }
@@ -202,7 +244,8 @@
                 "exec": [
                   "const data = pm.response.json();",
                   "pm.collectionVariables.set('memberToken', data.access_token);",
-                  "pm.test('Login returned a token', function () { pm.expect(data.token_type).to.eql('bearer'); });"
+                  "pm.test('Login returned a token', function () { pm.expect(data.token_type).to.eql('bearer'); });",
+                  "pm.test(\"Expected HTTP 200\", function () { pm.response.to.have.status(200); });"
                 ]
               }
             }
@@ -239,7 +282,8 @@
                 "exec": [
                   "const data = pm.response.json();",
                   "pm.collectionVariables.set('adminToken', data.access_token);",
-                  "pm.test('Login returned a token', function () { pm.expect(data.token_type).to.eql('bearer'); });"
+                  "pm.test('Login returned a token', function () { pm.expect(data.token_type).to.eql('bearer'); });",
+                  "pm.test(\"Expected HTTP 200\", function () { pm.response.to.have.status(200); });"
                 ]
               }
             }
@@ -284,7 +328,8 @@
                 "exec": [
                   "const data = pm.response.json();",
                   "pm.collectionVariables.set('projectId', data.id);",
-                  "pm.test('Saved projectId', function () { pm.expect(data.id).to.exist; });"
+                  "pm.test('Saved projectId', function () { pm.expect(data.id).to.exist; });",
+                  "pm.test(\"Expected HTTP 201\", function () { pm.response.to.have.status(201); });"
                 ]
               }
             }
@@ -301,7 +346,18 @@
               }
             ],
             "url": "{{baseUrl}}/projects?skip=0&limit=20"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get project and task summary",
@@ -314,7 +370,18 @@
               }
             ],
             "url": "{{baseUrl}}/projects/{{projectId}}"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "List project tasks with filters",
@@ -326,8 +393,19 @@
                 "value": "Bearer {{managerToken}}"
               }
             ],
-            "url": "{{baseUrl}}/projects/{{projectId}}/tasks?status=todo&priority=high"
-          }
+            "url": "{{baseUrl}}/projects/{{projectId}}/tasks?status=todo&priority=high&assignee_id={{memberId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -368,7 +446,8 @@
                 "exec": [
                   "const data = pm.response.json();",
                   "pm.collectionVariables.set('taskId', data.id);",
-                  "pm.test('Saved taskId', function () { pm.expect(data.id).to.exist; });"
+                  "pm.test('Saved taskId', function () { pm.expect(data.id).to.exist; });",
+                  "pm.test(\"Expected HTTP 201\", function () { pm.response.to.have.status(201); });"
                 ]
               }
             }
@@ -385,7 +464,18 @@
               }
             ],
             "url": "{{baseUrl}}/tasks/{{taskId}}"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get my assigned tasks",
@@ -398,7 +488,18 @@
               }
             ],
             "url": "{{baseUrl}}/my/tasks"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Move status to in_progress",
@@ -424,8 +525,19 @@
                 }
               }
             },
-            "description": "Run once in order: todo → in_progress → review → done. Assignee only."
-          }
+            "description": "Run once in order: todo \u2192 in_progress \u2192 review \u2192 done. Assignee only."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Move status to review",
@@ -451,7 +563,18 @@
                 }
               }
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Move status to done",
@@ -477,7 +600,18 @@
                 }
               }
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Update task details",
@@ -504,7 +638,18 @@
               }
             },
             "description": "Owning manager/admin only."
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -545,7 +690,8 @@
                 "exec": [
                   "const data = pm.response.json();",
                   "pm.collectionVariables.set('commentId', data.id);",
-                  "pm.test('Saved commentId', function () { pm.expect(data.id).to.exist; });"
+                  "pm.test('Saved commentId', function () { pm.expect(data.id).to.exist; });",
+                  "pm.test(\"Expected HTTP 201\", function () { pm.response.to.have.status(201); });"
                 ]
               }
             }
@@ -562,7 +708,18 @@
               }
             ],
             "url": "{{baseUrl}}/tasks/{{taskId}}/comments"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Delete comment (author)",
@@ -576,7 +733,18 @@
             ],
             "url": "{{baseUrl}}/comments/{{commentId}}",
             "description": "Only the author or admin can delete it. Expect 204."
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -616,7 +784,8 @@
                 "exec": [
                   "const data = pm.response.json();",
                   "pm.collectionVariables.set('cleanupTaskId', data.id);",
-                  "pm.test('Saved cleanupTaskId', function () { pm.expect(data.id).to.exist; });"
+                  "pm.test('Saved cleanupTaskId', function () { pm.expect(data.id).to.exist; });",
+                  "pm.test(\"Expected HTTP 201\", function () { pm.response.to.have.status(201); });"
                 ]
               }
             }
@@ -634,7 +803,18 @@
             ],
             "url": "{{baseUrl}}/tasks/{{cleanupTaskId}}",
             "description": "Owning manager/admin only. The first task remains for the project cascade test."
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Delete project and child tasks/comments",
@@ -648,7 +828,18 @@
             ],
             "url": "{{baseUrl}}/projects/{{projectId}}",
             "description": "Admin only. This permanently deletes the project and cascades to tasks and comments. Expect 204."
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
         }
       ]
     }
