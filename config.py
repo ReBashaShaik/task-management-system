@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     database_url: str = "sqlite:///./task_management.db"
+    database_ssl_ca: str | None = None
     secret_key: str = "development-only-change-this-secret"
     access_token_expire_minutes: int = 60
     bootstrap_admin_email: str | None = None

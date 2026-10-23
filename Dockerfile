@@ -4,6 +4,6 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
-EXPOSE 8000
-HEALTHCHECK --interval=30s --timeout=3s --start-period=45s --retries=3 CMD python -c "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/health', timeout=2)" || exit 1
-CMD ["sh", "-c", "alembic upgrade head && python -m bootstrap && exec uvicorn main:app --host 0.0.0.0 --port 8000"]
+EXPOSE 10000
+HEALTHCHECK --interval=30s --timeout=3s --start-period=45s --retries=3 CMD python -c "import os; from urllib.request import urlopen; urlopen('http://127.0.0.1:' + os.getenv('PORT', '8000') + '/health', timeout=2)" || exit 1
+CMD ["sh", "-c", "alembic upgrade head && python -m bootstrap && exec uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]

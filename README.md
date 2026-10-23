@@ -15,6 +15,7 @@ A beginner-friendly REST API for managing projects, tasks, and team comments. Pr
 - [Useful Docker commands](#useful-docker-commands)
 - [Troubleshooting](#troubleshooting)
 - [More project guides](#more-project-guides)
+- [Free public deployment guide](DEPLOYMENT_FREE.md)
 - [Deployment status](#deployment-status)
 
 ## What this project includes
@@ -278,7 +279,7 @@ The Docker database is separate from a MySQL server installed directly on your c
 
 ## Deployment status
 
-This repository is set up to run locally with Docker Compose. It does not include a public deployment URL yet. The Compose ports are bound to the local computer, so this setup is intended for local development and demonstration.
+The project can be deployed publicly using the beginner-friendly free setup in [DEPLOYMENT_FREE.md](DEPLOYMENT_FREE.md). A public deployment URL has not been created yet. The Compose ports are bound to the local computer, so Compose remains for local development and demonstration.
 
 ## Security notes
 

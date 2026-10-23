@@ -9,7 +9,13 @@ class Base(DeclarativeBase):
     pass
 
 
-connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
+if settings.database_url.startswith("sqlite"):
+    connect_args = {"check_same_thread": False}
+elif settings.database_ssl_ca:
+    # Hosted MySQL providers can use this CA file to verify encrypted connections.
+    connect_args = {"ssl": {"ca": settings.database_ssl_ca}}
+else:
+    connect_args = {}
 engine = create_engine(settings.database_url, connect_args=connect_args, pool_pre_ping=True)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
