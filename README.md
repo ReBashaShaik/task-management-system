@@ -77,19 +77,38 @@ All responses are JSON. Protected endpoints need a bearer token.
 
 ### Docker (recommended)
 
-On Windows PowerShell, copy the example settings file with:
+On Windows PowerShell, create `.env` from the example only if you do not already have one:
 
 ```powershell
-Copy-Item .env.example .env
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 ```
+
+Open `.env` and set a private `SECRET_KEY`, `BOOTSTRAP_ADMIN_PASSWORD`, and MySQL passwords before starting the containers. For this local Compose setup, use simple letters and numbers in the MySQL passwords so they fit safely in the connection URL. The example passwords are for local learning only; do not use them on a public server.
 
 Then start Docker Compose:
 
-```bash
+```powershell
 docker compose up --build
 ```
 
-The API is at <http://localhost:8000>; interactive docs are at <http://localhost:8000/docs>. The container runs database migrations before starting the API. Docker's MySQL is available on host port `3307`, which avoids clashing with a MySQL server already using `3306`.
+The API is at <http://localhost:8000>; interactive docs are at <http://localhost:8000/docs>. The API container uses Python 3.11, waits for MySQL 8.0 to become healthy, runs Alembic migrations, creates the configured bootstrap admin if needed, and then starts FastAPI. Docker's MySQL is available on host port `3307`, which avoids clashing with a local MySQL server already using `3306`. Both ports are bound to `127.0.0.1`, so they are reachable only from this PC during local development.
+
+To stop the containers while keeping the database data, press `Ctrl+C` and run:
+
+```powershell
+docker compose down
+```
+
+To view API logs in another terminal, run `docker compose logs -f api`.
+
+If the Docker admin login password was changed in `.env` after the admin was first created, the existing database keeps its old password. Choose a new private `BOOTSTRAP_ADMIN_PASSWORD` in `.env`, then run these commands in a second PowerShell window from the project folder to apply it without deleting database data:
+
+```powershell
+docker compose up -d --force-recreate api
+docker compose exec api python -m bootstrap --reset-password
+```
+
+Then log in at <http://localhost:8000/docs> using `BOOTSTRAP_ADMIN_EMAIL` and the new password. The reset option is explicit; normal container starts do not reset an existing admin password.
 
 ### Run directly on Windows with your local MySQL
 

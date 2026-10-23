@@ -1,18 +1,18 @@
 services:
   db:
-    image: mysql:8.4
+    image: mysql:8.0
     environment:
-      MYSQL_DATABASE: task_management
-      MYSQL_USER: task_user
-      MYSQL_PASSWORD: task_password
-      MYSQL_ROOT_PASSWORD: local_root_password
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-task_management}
+      MYSQL_USER: ${MYSQL_USER:-task_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Add MYSQL_PASSWORD to the project .env file}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Add MYSQL_ROOT_PASSWORD to the project .env file}
     ports:
-      # Use host port 3307 so a local MySQL server can keep port 3306.
-      - "3307:3306"
+      # Keep the Docker database private to this PC; use 3307 to avoid host MySQL.
+      - "127.0.0.1:3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-plocal_root_password"]
+      test: ["CMD-SHELL", "mysqladmin ping --host=127.0.0.1 --user=root --password=\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -21,9 +21,16 @@ services:
     env_file: .env
     environment:
       # Inside Docker, the API reaches MySQL by the Compose service name.
-      DATABASE_URL: mysql+pymysql://task_user:task_password@db:3306/task_management
+      DATABASE_URL: mysql+pymysql://${MYSQL_USER:-task_user}:${MYSQL_PASSWORD:?Add MYSQL_PASSWORD to the project .env file}@db:3306/${MYSQL_DATABASE:-task_management}
     ports:
-      - "8000:8000"
+      # The API is for local development and should not be exposed to the network.
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/health', timeout=2)"]
+      interval: 30s
+      timeout: 3s
+      start_period: 45s
+      retries: 3
     depends_on:
       db:
         condition: service_healthy
