@@ -226,3 +226,19 @@ def test_task_update_rejects_empty_or_null_required_fields(client):
 
     assert empty_update.status_code == 422
     assert null_title.status_code == 422
+
+def test_login_is_rate_limited(client):
+    """Repeated login attempts from one IP receive a clear 429 response."""
+    from utils.rate_limit import limiter
+
+    limiter.reset()
+    login_data = {"email": "missing.user@gmail.com", "password": "StrongPass123!"}
+
+    for _ in range(30):
+        response = client.post("/auth/login", data=login_data)
+        assert response.status_code == 401
+
+    limited_response = client.post("/auth/login", data=login_data)
+    limiter.reset()
+
+    assert limited_response.status_code == 429

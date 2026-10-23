@@ -1,9 +1,12 @@
 """Create the FastAPI application and connect its route groups."""
 from fastapi import FastAPI
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from middleware.exception_handlers import register_exception_handlers
 from middleware.request_logging import RequestLoggingMiddleware
 from routers import auth, comments, projects, tasks
+from utils.rate_limit import limiter
 
 app = FastAPI(
     title="Task Management API",
@@ -11,6 +14,8 @@ app = FastAPI(
     description="A simple API for projects, tasks, and team comments.",
 )
 
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(RequestLoggingMiddleware)
 register_exception_handlers(app)
 

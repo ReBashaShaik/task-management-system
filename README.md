@@ -212,6 +212,7 @@ POST /projects/1/tasks
 - `routers/`: HTTP endpoints, grouped by business area.
 - `services/`: business rules and database operations used by routes.
 - `utils/security.py`: password hashing and JWT handling.
+- `utils/rate_limit.py`: shared per-IP request limits for registration and login (30 requests per minute per route).
 - `middleware/`: request logging and shared error responses.
 - `bootstrap.py`: creates the first admin from environment settings.
 - `alembic/`: database migration setup and first migration.
@@ -223,4 +224,4 @@ POST /projects/1/tasks
 
 ## 10. Notes
 
-This is a review-ready assessment starter, not a deployed service. Add HTTPS, secret management, rate limiting, logging, and a production-grade MySQL backup plan before a public launch. Set `SECRET_KEY` to a long random value outside development.
+This is a locally runnable assessment project, not a deployed service. Before a public launch, use HTTPS, store secrets in the hosting platform, configure production-grade MySQL backups, and use shared rate-limit storage if you run more than one API instance. The current 30-per-minute authentication limits use in-memory storage and are intended for a single instance. Set `SECRET_KEY` to a long random value outside development.

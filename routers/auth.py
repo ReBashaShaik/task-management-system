@@ -1,24 +1,27 @@
 """HTTP endpoints for registration and login."""
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi import Form
+from fastapi import Form, Request
 from pydantic import EmailStr
 from sqlalchemy.orm import Session
 
 from dependencies import get_db
 from schemas import UserCreate, UserOut, require_gmail_address
 from services import auth_service
+from utils.rate_limit import limiter
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
-def register(data: UserCreate, db: Session = Depends(get_db)):
+@limiter.limit("30/minute")
+def register(request: Request, data: UserCreate, db: Session = Depends(get_db)):
     """Create a member or project manager account."""
     return auth_service.register_user(data, db)
 
 
 @router.post("/login")
-def login(email: EmailStr = Form(...), password: str = Form(..., min_length=8, max_length=72),
+@limiter.limit("30/minute")
+def login(request: Request, email: EmailStr = Form(...), password: str = Form(..., min_length=8, max_length=72),
           db: Session = Depends(get_db)):
     """Check the email/password form and return a JWT access token."""
     try:
