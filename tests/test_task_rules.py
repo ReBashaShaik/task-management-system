@@ -223,9 +223,33 @@ def test_task_update_rejects_empty_or_null_required_fields(client):
 
     empty_update = client.put(f"/tasks/{task['id']}", json={}, headers=manager_headers)
     null_title = client.put(f"/tasks/{task['id']}", json={"title": None}, headers=manager_headers)
+    blank_title = client.put(
+        f"/tasks/{task['id']}", json={"title": "   "}, headers=manager_headers
+    )
 
     assert empty_update.status_code == 422
     assert null_title.status_code == 422
+    assert blank_title.status_code == 422
+
+
+def test_project_task_and_comment_text_cannot_be_blank(client):
+    manager_headers, member_headers, task = setup_task(client)
+    project_id = task["project_id"]
+
+    blank_project = client.post("/projects", json={"name": "   "}, headers=manager_headers)
+    blank_task = client.post(
+        f"/projects/{project_id}/tasks",
+        json={"assignee_id": task["assignee_id"], "title": "   "},
+        headers=manager_headers,
+    )
+    blank_comment = client.post(
+        f"/tasks/{task['id']}/comments", json={"content": "   "}, headers=member_headers
+    )
+
+    assert blank_project.status_code == 422
+    assert blank_task.status_code == 422
+    assert blank_comment.status_code == 422
+
 
 def test_login_is_rate_limited(client):
     """Repeated login attempts from one IP receive a clear 429 response."""

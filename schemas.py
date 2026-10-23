@@ -47,6 +47,15 @@ class ProjectCreate(BaseModel):
     name: str = Field(min_length=1, max_length=180)
     description: str | None = None
 
+    @field_validator("name")
+    @classmethod
+    def project_name_must_not_be_blank(cls, value: str) -> str:
+        """Trim the project name and reject a value made only of spaces."""
+        clean_name = value.strip()
+        if not clean_name:
+            raise ValueError("Project name cannot be empty")
+        return clean_name
+
 
 class ProjectOut(BaseModel):
     id: int
@@ -68,6 +77,15 @@ class TaskCreate(BaseModel):
     priority: Priority = "medium"
     due_date: date | None = None
 
+    @field_validator("title")
+    @classmethod
+    def task_title_must_not_be_blank(cls, value: str) -> str:
+        """Trim the task title and reject a value made only of spaces."""
+        clean_title = value.strip()
+        if not clean_title:
+            raise ValueError("Task title cannot be empty")
+        return clean_title
+
 
 class TaskUpdate(BaseModel):
     assignee_id: int | None = None
@@ -75,6 +93,17 @@ class TaskUpdate(BaseModel):
     description: str | None = None
     priority: Priority | None = None
     due_date: date | None = None
+
+    @field_validator("title")
+    @classmethod
+    def updated_task_title_must_not_be_blank(cls, value: str | None) -> str | None:
+        """Keep updated titles readable and reject whitespace-only titles."""
+        if value is None:
+            return value
+        clean_title = value.strip()
+        if not clean_title:
+            raise ValueError("Task title cannot be empty")
+        return clean_title
 
     @model_validator(mode="before")
     @classmethod
@@ -110,6 +139,15 @@ class TaskOut(BaseModel):
 
 class CommentCreate(BaseModel):
     content: str = Field(min_length=1, max_length=5000)
+
+    @field_validator("content")
+    @classmethod
+    def comment_content_must_not_be_blank(cls, value: str) -> str:
+        """Trim comment text and reject a value made only of spaces."""
+        clean_content = value.strip()
+        if not clean_content:
+            raise ValueError("Comment cannot be empty")
+        return clean_content
 
 
 class CommentOut(BaseModel):

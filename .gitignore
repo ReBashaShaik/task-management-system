@@ -9,3 +9,8 @@ work/
 
 
 *.db
+presentation_build/
+presentation-build/
+presentation_output/
+presentation-output/
+*.inspect.ndjson
