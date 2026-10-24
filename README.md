@@ -279,7 +279,12 @@ The Docker database is separate from a MySQL server installed directly on your c
 
 ## Deployment status
 
-The project can be deployed publicly using the beginner-friendly free setup in [DEPLOYMENT_FREE.md](DEPLOYMENT_FREE.md). A public deployment URL has not been created yet. The Compose ports are bound to the local computer, so Compose remains for local development and demonstration.
+The API is publicly deployed on Render and uses Aiven MySQL:
+
+- Swagger UI: [https://task-management-system-api-lkwx.onrender.com/docs](https://task-management-system-api-lkwx.onrender.com/docs)
+- Health check: [https://task-management-system-api-lkwx.onrender.com/health](https://task-management-system-api-lkwx.onrender.com/health)
+
+The deployed registration flow has been checked. New public registrations are stored in the hosted Aiven database, not in the local Docker database. The Render free web service can spin down after 15 minutes without requests; the first request afterward may take about a minute to start. Free services are suitable for demos and learning, not production availability. See [DEPLOYMENT_FREE.md](DEPLOYMENT_FREE.md) for the setup and limitations. The Compose ports are bound to the local computer, so Compose remains for local development and demonstration.
 
 ## Security notes
 

@@ -224,7 +224,7 @@ Common response codes: 200 success; 201 created; 204 deleted; 400 invalid busine
 
 ## 17. Not included
 - No endpoint changes user role, active state, or deletes users. `is_active` defaults true and is checked during authentication; a database operator must change it directly.
-- No public deployment URL or frontend is included.
+- The API is publicly deployed on Render at https://task-management-system-api-lkwx.onrender.com/docs and uses Aiven MySQL. This repository provides a backend API; it does not include a graphical frontend.
 - No file upload route exists even though aiofiles is installed.
 - Task and comment lists are not paginated.
 
